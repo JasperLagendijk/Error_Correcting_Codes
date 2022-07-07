@@ -13,12 +13,14 @@ struct decoder {
 
 struct variableNode {
 	int connectedNodes;
+	int index[MAX_CHECK_NODE];
 	int messages[MAX_CHECK_NODE];
 	struct checkNode * chNode[MAX_CHECK_NODE];	
 };
 
 struct checkNode {
 	int connectedNodes;
+	int index[MAX_CHECK_NODE];
 	int messages[MAX_VAR_NODE];
 	struct variableNode * varNode[MAX_VAR_NODE];
 };
@@ -47,18 +49,12 @@ void min_sum(struct checkNode * check)
 			}
 	}
 	for (int i = 0; i < check->connectedNodes; i++) if ( i != j && abs(check->messages[i]) < min2) min2 = abs(check->messages[i]);
-	//Step 2: for each message 
+	//Step 2: for each connected variable node
 	for (int i = 0; i < check->connectedNodes; i++)
 	{
-		for (int k = 0; k < check->varNode[i]->connectedNodes; k++)
-		{
-			if (memcmp(check->varNode[i]->chNode, check, sizeof(check)))
-			{
-				if (i == j) check->varNode[i]->messages[k] = min2*-1*sig;
-				else check->varNode[i]->messages[k] = min*-1*sig;
-				break;
-			}
-		}
+		if (i == j) check->varNode[i]->messages[check->index[i]] = min2*-1*sig;
+		else check->varNode[i]->messages[check->index[i]] = min*-1*sig;
+		
 	}
 	
 }
@@ -154,11 +150,22 @@ struct decoder construct_decoder()
 	struct decoder dec;
 	
 	//Fill check nodes:
+	int j, k;
 	for (int i = 0; i < LEN_PARITY; i++)
 	{
-		check[parity[1][i]].varNode[parity[0][i]] = &var[parity[0][i]];
+		//Just for readability, as both are used 4-5 times
+		j = parity[1][i];
+		k = parity[0][i];
+		
+		//connect varNode to Checknode and vice versa and remember index refelctively
+		check[j].varNode[check[j].connectedNodes] = &var[k]; 
+		check[j].index[check[j].connectedNodes] = var[k].connectedNodes;
+		
+		var[k].chNode[var[k].connectedNodes] = &check[j];
+		var[k].index[var[k].connectedNodes] =  check[j].connectedNodes;
+		
+		//increase number of connected nodes
 		check[parity[1][i]].connectedNodes++;
-		var[parity[0][i]].chNode[parity[1][i]] = &check[parity[1][i]];
 		var[parity[0][i]].connectedNodes++;
 	}
 	for (int i = 0; i < COLS; i++) dec.var[i] = &var[i];
@@ -182,7 +189,6 @@ int main()
 	
 	//encode_ldpc(msg, codeword);
 	struct decoder dec = construct_decoder();
-	printf("%d", dec.check[0]->messages[0]);
 	//for (int i = 0; i < COLS; i++) printf("%d\n", codeword[i]);
 	
 	return 0;
