@@ -20,7 +20,7 @@ struct variableNode {
 
 struct checkNode {
 	int connectedNodes;
-	int index[MAX_CHECK_NODE];
+	int index[MAX_VAR_NODE];
 	int messages[MAX_VAR_NODE];
 	struct variableNode * varNode[MAX_VAR_NODE];
 };
@@ -59,6 +59,14 @@ void min_sum(struct checkNode * check)
 	
 }
 
+
+void message_out_variable(struct variableNode * var)
+{
+	int msg = 0;
+	for (int i = 0; i < var->connectedNodes; i++) msg += var->messages[i];
+	for (int i = 0; i < var->connectedNodes; i++) var->chNode[i]->messages[var->index[i]] = msg - var->messages[i];
+	
+}
 
 
 void encode_ldpc(unsigned int msg[ROWS], unsigned int codeword[COLS])
