@@ -7,10 +7,10 @@
 struct variableNode;
 struct checkNode;
 
-typedef struct decoder {
+typedef struct LDPC_decoder {
 	struct variableNode  * var[COLS];
 	struct checkNode * check[ROWS];
-} decoder;
+} LDPC_decoder;
 
 struct variableNode {
 	int connectedNodes;
@@ -176,11 +176,11 @@ void encode_ldpc(unsigned int msg[ROWS], unsigned int codeword[COLS])
 
 
 
-struct decoder construct_decoder()
+LDPC_decoder construct_decoder()
 {
 	struct variableNode  * var[COLS];
 	struct checkNode  * check[ROWS];
-	struct decoder dec;
+	LDPC_decoder dec;
 	
 	//Allocate memory
 	for (int i = 0; i < COLS; i++) var[i] = malloc(sizeof(*var[0]));
@@ -210,7 +210,7 @@ struct decoder construct_decoder()
 	return dec;
 }
 
-void decode_ldpc(int message[ROWS], int codeword[COLS], struct decoder * dec)
+void decode_ldpc(int message[ROWS], int codeword[COLS], LDPC_decoder * dec)
 {
 	//Step 1: initialize , i.e. set all values in varNodes to zero and copy LLR from message to  var
 	//printf("Initializing decoder\n");
@@ -246,19 +246,19 @@ void decode_ldpc(int message[ROWS], int codeword[COLS], struct decoder * dec)
 
 int main() 
 {
-	/*int msg[ROWS] = {0};
+	int msg[ROWS] = {0};
 	int message[ROWS] = {};
 	msg[0] = 1;
 	msg[8] = 1;
 	msg[3] = 1;
 	int codeword[COLS];
 	
-	for (int i = 0; i < ROWS; i++) printf("%d ", msg[i]);
-	printf("\n");
+	//for (int i = 0; i < ROWS; i++) printf("%d ", msg[i]);
+	//printf("\n");
 	
 	encode_ldpc(msg, codeword);
 	
-	struct decoder dec = construct_decoder();
+	LDPC_decoder dec = construct_decoder();
 	for (int i = 0; i < COLS; i++) codeword[i] =4* ( (codeword[i] * 2 )-1)+ (rand() % 9)-4;
 	//for (int i = 0; i < COLS; i++)  printf("%d ", sign_b(codeword[i]));
 	//printf("\n");
@@ -267,9 +267,9 @@ int main()
 	//for (int i = 0; i  < COLS; i++) printf("%d ", dec.var[i]->messages[0]);
 	//printf("\n");
 	
-	for (int i  = 0; i < 1000; i++) decode_ldpc(message, codeword, &dec);
+	for (int i  = 0; i < 10000; i++) decode_ldpc(message, codeword, &dec);
 	
 	//for (int i = 0; i < ROWS; i++) printf("%d ", (sign_b(message[i])-msg[i]));
-	*/
+	
 	return 0;
 }

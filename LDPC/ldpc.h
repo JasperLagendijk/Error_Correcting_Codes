@@ -1,10 +1,10 @@
 #ifndef LDPC_ENCODER
 #define LDPC_ENCODER
 
-struct decoder {
+typedef extern struct LDPC_decoder {
 	struct variableNode  * var[COLS];
 	struct checkNode * check[ROWS];
-};
+}LDPC_decoder;
 
 struct variableNode {
 	int connectedNodes;
