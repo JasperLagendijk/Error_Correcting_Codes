@@ -1,27 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "parity.h"
+
+#define BP_MAX 20
 
 struct variableNode;
 struct checkNode;
 
-struct decoder {
-	struct variableNode * var[COLS];
+typedef struct decoder {
+	struct variableNode  * var[COLS];
 	struct checkNode * check[ROWS];
-};
+} decoder;
 
 struct variableNode {
 	int connectedNodes;
+	int incoming_bit;
 	int index[MAX_CHECK_NODE];
-	int messages[MAX_CHECK_NODE];
+	int messages[MAX_CHECK_NODE]; //Represents both the incoming or outgoing messages, doing it this way allows for easy multithreading/cuda support
 	struct checkNode * chNode[MAX_CHECK_NODE];	
 };
 
 struct checkNode {
 	int connectedNodes;
 	int index[MAX_VAR_NODE];
-	int messages[MAX_VAR_NODE];
+	int messages[MAX_VAR_NODE]; //Represents both the incoming and outgoing messages.
 	struct variableNode * varNode[MAX_VAR_NODE];
 };
 
@@ -29,7 +31,13 @@ int sign(int x) {
     return (x > 0) - (x < 0);
 }
 
-void min_sum(struct checkNode * check)
+int sign_b(int x)
+{ 
+	if (x > 0) return 1;
+	else return 0;
+}
+
+void min_sum(struct checkNode * check) //Performs min-sum algorithm on values and messages and places them in messages, original incoming messages are lost
 {
 	int sig = 1;
 	int min = 0;
@@ -50,24 +58,39 @@ void min_sum(struct checkNode * check)
 	}
 	for (int i = 0; i < check->connectedNodes; i++) if ( i != j && abs(check->messages[i]) < min2) min2 = abs(check->messages[i]);
 	//Step 2: for each connected variable node
-	for (int i = 0; i < check->connectedNodes; i++)
-	{
+	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = min*-1*sig*sign(check->messages[i])/2;
+	/*{
 		if (i == j) check->varNode[i]->messages[check->index[i]] = min2*-1*sig;
 		else check->varNode[i]->messages[check->index[i]] = min*-1*sig;
 		
-	}
+	}*/
 	
 }
 
-
-void message_out_variable(struct variableNode * var)
+void message_out_variable(struct variableNode * var) //Calculates variable node value and places them in messages
 {
-	int msg = 0;
+	int msg = var->incoming_bit;
 	for (int i = 0; i < var->connectedNodes; i++) msg += var->messages[i];
-	for (int i = 0; i < var->connectedNodes; i++) var->chNode[i]->messages[var->index[i]] = msg - var->messages[i];
-	
+	//for (int i = 0; i < var->connectedNodes; i++) var->chNode[i]->messages[var->index[i]] = msg - var->messages[i];
+	for (int i = 0; i < var->connectedNodes; i++) var->messages[i] = msg - var->messages[i];
 }
 
+void message_check_to_var(struct checkNode * check)
+{
+		for (int i = 0;  i < check->connectedNodes; i++) check->varNode[i]->messages[check->index[i]] = check->messages[i];
+}
+
+void message_var_to_check(struct variableNode * var)
+{
+	for (int i = 0; i < var->connectedNodes; i++)  var->chNode[i]->messages[var->index[i]] = var->messages[i];
+}
+
+int  message_decoded(struct variableNode * var)
+{
+	int msg = var->incoming_bit; 
+	for (int i = 0; i < var->connectedNodes; i++) msg += var->messages[i];
+	return msg;
+}
 
 void encode_ldpc(unsigned int msg[ROWS], unsigned int codeword[COLS])
 {
@@ -151,11 +174,17 @@ void encode_ldpc(unsigned int msg[ROWS], unsigned int codeword[COLS])
 }
 
 
+
+
 struct decoder construct_decoder()
 {
-	struct variableNode var[COLS];
-	struct checkNode check[ROWS];
+	struct variableNode  * var[COLS];
+	struct checkNode  * check[ROWS];
 	struct decoder dec;
+	
+	//Allocate memory
+	for (int i = 0; i < COLS; i++) var[i] = malloc(sizeof(*var[0]));
+	for (int i = 0; i < ROWS; i++) check[i] = malloc(sizeof(*check[0]));
 	
 	//Fill check nodes:
 	int j, k;
@@ -166,24 +195,50 @@ struct decoder construct_decoder()
 		k = parity[0][i];
 		
 		//connect varNode to Checknode and vice versa and remember index refelctively
-		check[j].varNode[check[j].connectedNodes] = &var[k]; 
-		check[j].index[check[j].connectedNodes] = var[k].connectedNodes;
+		check[j]->varNode[check[j]->connectedNodes] = var[k]; 
+		check[j]->index[check[j]->connectedNodes] = var[k]->connectedNodes;
 		
-		var[k].chNode[var[k].connectedNodes] = &check[j];
-		var[k].index[var[k].connectedNodes] =  check[j].connectedNodes;
+		var[k]->chNode[var[k]->connectedNodes] = check[j];
+		var[k]->index[var[k]->connectedNodes] =  check[j]->connectedNodes;
 		
 		//increase number of connected nodes
-		check[parity[1][i]].connectedNodes++;
-		var[parity[0][i]].connectedNodes++;
+		check[parity[1][i]]->connectedNodes++;
+		var[parity[0][i]]->connectedNodes++;
 	}
-	for (int i = 0; i < COLS; i++) dec.var[i] = &var[i];
-	for (int i = 0; i < ROWS; i++) dec.check[i] = &check[i];
+	for (int i = 0; i < COLS; i++) dec.var[i] = var[i];
+	for (int i = 0; i < ROWS; i++) dec.check[i] = check[i];
 	return dec;
 }
 
-void decode_ldpc(int message, int codeword)
+void decode_ldpc(int message[ROWS], int codeword[COLS], struct decoder * dec)
 {
-
+	//Step 1: initialize , i.e. set all values in varNodes to zero and copy LLR from message to  var
+	//printf("Initializing decoder\n");
+	for (int i  = 0 ; i < COLS;  i++) 
+	{	
+		//printf("(%d)\n", i);
+		dec->var[i]->incoming_bit = codeword[i]; //set incoming bit
+		for (int j = 0; j < dec->var[i]->connectedNodes; j++) dec->var[i]->messages[j] = 0; //set messages from checknode to varnode
+	}
+	//printf("Starting Belief Propagation\n");
+	//Step 2: belief propagation
+	for (int bp = 0; bp < BP_MAX; bp++)
+	{
+		//Calculate upward messages
+		for (int i = 0; i < COLS;  i++) message_out_variable(dec->var[i]);
+		
+		//Copy messages from varNode to checkNode
+		for (int i = 0; i < COLS; i++) message_var_to_check(dec->var[i]);
+		
+		//Calculate downward messages
+		for (int i = 0; i < ROWS; i++) min_sum(dec->check[i]);
+		
+		//Copy messages from checkNode to varNode
+		for (int i = 0; i < ROWS; i++) message_check_to_var(dec->check[i]);
+	}
+	//Step 3: calculate outgoing message
+	for (int i = 0; i < ROWS; i++) message[i] = message_decoded(dec->var[i]);
+	
 }
 
 
@@ -191,13 +246,30 @@ void decode_ldpc(int message, int codeword)
 
 int main() 
 {
-	//int msg[ROWS] = {0};
-	//msg[0] = 1;
-	//int codeword[COLS];
+	/*int msg[ROWS] = {0};
+	int message[ROWS] = {};
+	msg[0] = 1;
+	msg[8] = 1;
+	msg[3] = 1;
+	int codeword[COLS];
 	
-	//encode_ldpc(msg, codeword);
+	for (int i = 0; i < ROWS; i++) printf("%d ", msg[i]);
+	printf("\n");
+	
+	encode_ldpc(msg, codeword);
+	
 	struct decoder dec = construct_decoder();
-	//for (int i = 0; i < COLS; i++) printf("%d\n", codeword[i]);
+	for (int i = 0; i < COLS; i++) codeword[i] =4* ( (codeword[i] * 2 )-1)+ (rand() % 9)-4;
+	//for (int i = 0; i < COLS; i++)  printf("%d ", sign_b(codeword[i]));
+	//printf("\n");
+	//for (int i = 0; i  < COLS; i++) dec.var[i]->messages[0] = i;
 	
+	//for (int i = 0; i  < COLS; i++) printf("%d ", dec.var[i]->messages[0]);
+	//printf("\n");
+	
+	for (int i  = 0; i < 1000; i++) decode_ldpc(message, codeword, &dec);
+	
+	//for (int i = 0; i < ROWS; i++) printf("%d ", (sign_b(message[i])-msg[i]));
+	*/
 	return 0;
 }
