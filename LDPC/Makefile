@@ -4,12 +4,12 @@ DEPS = ldpc.h parity.h
 OBJ = parity.o ldpc.o 
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -O3 -c -o $@ $< $(CFLAGS)
 
 ldpc: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) -O3
+	$(CC) -O3 -o $@ $^ $(CFLAGS) 
 
 .PHONY clean:
 
 clean: 
-	rm *.o
+	rm *.o ldpc
