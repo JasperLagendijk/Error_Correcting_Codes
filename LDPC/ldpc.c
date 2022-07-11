@@ -1,31 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parity.h"
+#include "ldpc.h"
 
 #define BP_MAX 20
 
-struct variableNode;
-struct checkNode;
 
-typedef struct LDPC_decoder {
-	struct variableNode  * var[COLS];
-	struct checkNode * check[ROWS];
-} LDPC_decoder;
+
+struct LDPC_decoder {
+	variableNode  * var[COLS];
+	checkNode * check[ROWS];
+};
 
 struct variableNode {
 	int connectedNodes;
 	int incoming_bit;
 	int index[MAX_CHECK_NODE];
 	int messages[MAX_CHECK_NODE]; //Represents both the incoming or outgoing messages, doing it this way allows for easy multithreading/cuda support
-	struct checkNode * chNode[MAX_CHECK_NODE];	
+	checkNode * chNode[MAX_CHECK_NODE];	
 };
 
-struct checkNode {
+typedef struct checkNode {
 	int connectedNodes;
 	int index[MAX_VAR_NODE];
 	int messages[MAX_VAR_NODE]; //Represents both the incoming and outgoing messages.
-	struct variableNode * varNode[MAX_VAR_NODE];
-};
+	variableNode * varNode[MAX_VAR_NODE];
+} checkNode;
 
 int sign(int x) {
     return (x > 0) - (x < 0);
@@ -49,16 +49,23 @@ void min_sum(struct checkNode * check) //Performs min-sum algorithm on values an
 	min2 = abs(check->messages[0]);
 	for (int i = 0; i < check->connectedNodes; i++)
 	{
-			sig *= sign(check->messages[i]);
-			if (abs(check->messages[i]) < min) 
+			int x = check->messages[i];
+			//Find absolute value of check->messages
+			int mask = x >> 31;
+			x = x ^ mask;
+			x = x - mask;
+
+			//x = nu abs x
+			sig *= (mask & 1);
+			if (x < min) 
 			{
-				min = abs(check->messages[i]);
+				min = x;
 				j = i;
 			}
 	}
-	for (int i = 0; i < check->connectedNodes; i++) if ( i != j && abs(check->messages[i]) < min2) min2 = abs(check->messages[i]);
+	//for (int i = 0; i < check->connectedNodes; i++) if ( i != j && abs(check->messages[i]) < min2) min2 = abs(check->messages[i]);
 	//Step 2: for each connected variable node
-	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = min*-1*sig*sign(check->messages[i])/2;
+	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = min*sig*sign(check->messages[i])/2;
 	/*{
 		if (i == j) check->varNode[i]->messages[check->index[i]] = min2*-1*sig;
 		else check->varNode[i]->messages[check->index[i]] = min*-1*sig;

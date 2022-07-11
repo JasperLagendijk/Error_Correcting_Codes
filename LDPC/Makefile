@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I.
+CFLAGS=-I. -march=native -mtune=native
 DEPS = ldpc.h parity.h
 OBJ = parity.o ldpc.o 
 
@@ -7,4 +7,9 @@ OBJ = parity.o ldpc.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 ldpc: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) -O3
+
+.PHONY clean:
+
+clean: 
+	rm *.o
