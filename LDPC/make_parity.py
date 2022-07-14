@@ -48,6 +48,7 @@ def main():
 	# Create parity.c file
 	fc = open("parity.c", "w")
 	fc.writelines(["#include <stdio.h>\n", "\n\n"])
+	fc.writelines(["#include \"parity.h\" "])
 		# parity matrix
 	
 	
@@ -84,7 +85,7 @@ def main():
 			L2.append(str(i))
 			L2.append(", ")
 			q[1] += 1
-	fc.writelines(["unsigned int A[2][", str(q[1]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
+	fc.writelines(["unsigned bit_size A[2][", str(q[1]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
 	L1.pop(-1)
 	L2.pop(-1)
 	fc.writelines(L1)
@@ -92,6 +93,15 @@ def main():
 	fc.writelines(L2)
 	fc.writelines(["}\n};\n"])
 	
+	L4 = []
+	for i  in range(L2[-1]):
+		L4.append(str(L2.index(i)))
+		L4.append(",")
+	L4.pop(-1)
+	
+	fc.writelines(["unsigned bit_size A_index[", str(q[-1]) , "] { "])
+	fc.writelines(L4)
+	fc.writelines(["}\n"])
 		# B matrix
 	
 	L1 = []
@@ -106,7 +116,7 @@ def main():
 			q[2] += 1	
 	L1.pop(-1)
 	L2.pop(-1)
-	fc.writelines(["unsigned int B[2][", str(q[2]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
+	fc.writelines(["unsigned bit_size B[2][", str(q[2]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L1)
 	fc.writelines([" },\n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L2)
@@ -129,7 +139,7 @@ def main():
 			q[3] += 1
 	L1.pop(-1)
 	L2.pop(-1)
-	fc.writelines(["unsigned int T_inv[3][", str(q[3]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
+	fc.writelines(["unsigned bit_size T_inv[3][", str(q[3]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L1)
 	fc.writelines([" },\n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L2)
@@ -154,7 +164,7 @@ def main():
 	L1.pop(-1)
 	L2.pop(-1)
 	L3.pop(-1)
-	fc.writelines(["int p1_encoder[3][", str((q[4])),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
+	fc.writelines(["bit_size p1_encoder[3][", str((q[4])),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L1)
 	fc.writelines([" },\n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L2)
@@ -179,13 +189,15 @@ def main():
 	fh.writelines(["#define LEN_B ", str(q[2]), "\n"])
 	fh.writelines(["#define LEN_T_INV ", str(q[3]), "\n"])
 	fh.writelines(["#define LEN_P1_ENC ", str(q[4]), "\n\n"])
+	fh.writelines(["#define bit_size short int \n"])
+	
 	
 	fh.writelines(["\textern unsigned int parity[2][", str(q[0]), "];\n"])
 
 	
-	fh.writelines(["\textern unsigned int A[2][", str(q[1]), "];\n"])
-	fh.writelines(["\textern unsigned int B[2][", str(q[2]), "];\n"])
-	fh.writelines(["\textern int T_inv[3][", str(q[3]), "];\n"])
+	fh.writelines(["\textern unsigned bit_size A[2][", str(q[1]), "];\n"])
+	fh.writelines(["\textern unsigned bit_size B[2][", str(q[2]), "];\n"])
+	fh.writelines(["\textern bit_size T_inv[3][", str(q[3]), "];\n"])
 	fh.writelines(["\textern int p1_encoder[3][", str(q[4]), "];\n"])
 	fh.writelines(["\n#endif"])
 	
