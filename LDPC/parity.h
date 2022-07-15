@@ -12,13 +12,15 @@
 #define LEN_B 54
 #define LEN_T_INV 1782
 #define LEN_P1_ENC 1512
-#define bit_size  short int
 
-
+#define bit_size short int 
 	extern unsigned int parity[2][2376];
 	extern unsigned bit_size A[2][1566];
 	extern unsigned bit_size B[2][54];
 	extern bit_size T_inv[3][1782];
 	extern bit_size p1_encoder[3][1512];
+	extern unsigned bit_size A_index[298];
+	extern unsigned bit_size T_inv_index[298];
+	extern unsigned bit_size p1_encoder_index[28];
 
 #endif

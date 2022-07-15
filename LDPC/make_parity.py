@@ -47,8 +47,8 @@ def main():
 	
 	# Create parity.c file
 	fc = open("parity.c", "w")
-	fc.writelines(["#include <stdio.h>\n", "\n\n"])
-	fc.writelines(["#include \"parity.h\" "])
+	fc.writelines(["#include <stdio.h>\n"])
+	fc.writelines(["#include \"parity.h\" \n\n\n"])
 		# parity matrix
 	
 	
@@ -94,14 +94,14 @@ def main():
 	fc.writelines(["}\n};\n"])
 	
 	L4 = []
-	for i  in range(L2[-1]):
-		L4.append(str(L2.index(i)))
-		L4.append(",")
-	L4.pop(-1)
+	for i  in range(int(L2[-1])):
+		L4.append(str(int(L2.index(str(i))/2)))
+		L4.append(", ")
+	L4.append(str(q[1]))
 	
-	fc.writelines(["unsigned bit_size A_index[", str(q[-1]) , "] { "])
+	fc.writelines(["\nunsigned bit_size A_index[", str(m-g+1) , "] =\t{ "])
 	fc.writelines(L4)
-	fc.writelines(["}\n"])
+	fc.writelines(["};\n\n"])
 		# B matrix
 	
 	L1 = []
@@ -122,11 +122,13 @@ def main():
 	fc.writelines(L2)
 	fc.writelines(["}\n};\n"])
 	
+	
 		# T_inv matrix
 	
 	L1 = []
 	L2 = []
 	L3 = []
+	L4 = []
 	q.append(0)
 	for i in range(T_inv.shape[0]):
 		for j, index in enumerate(T_inv_sprs[i].indices):
@@ -139,7 +141,7 @@ def main():
 			q[3] += 1
 	L1.pop(-1)
 	L2.pop(-1)
-	fc.writelines(["unsigned bit_size T_inv[3][", str(q[3]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
+	fc.writelines(["bit_size T_inv[3][", str(q[3]),"] = { \n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L1)
 	fc.writelines([" },\n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L2)
@@ -147,10 +149,21 @@ def main():
 	fc.writelines(L3)
 	fc.writelines(["}\n};\n"])
 	
+	for i  in range(int(L2[-1])):
+		L4.append(str(int(L2.index(str(i))/2)))
+		L4.append(", ")
+	L4.append(str(q[3]))
+	
+	fc.writelines(["\nunsigned bit_size T_inv_index[", str(m-g+1) , "] =\t{ "])
+	fc.writelines(L4)
+	fc.writelines(["};\n\n"])
+	
+	
 	
 	L1 = []
 	L2 = []
 	L3 = []
+	L4 = []
 	q.append(0)
 	for i in range(P1_encoder.shape[0]):
 		for j, index in enumerate(P1_encoder_sprs[i].indices):
@@ -171,6 +184,17 @@ def main():
 	fc.writelines([" },\n \t\t\t\t\t\t\t\t\t{ "])
 	fc.writelines(L3)
 	fc.writelines(["}\n};\n"])
+	
+	for i  in range(int(L2[-1])):
+		L4.append(str(int(L2.index(str(i))/2)))
+		L4.append(", ")
+	L4.append(str(q[4]))
+	
+	fc.writelines(["\nunsigned bit_size p1_encoder_index[", str(g+1) , "] =\t{ "])
+	fc.writelines(L4)
+	fc.writelines(["};\n\n"])
+	
+	
 		
 	fc.close()
 	
@@ -193,12 +217,16 @@ def main():
 	
 	
 	fh.writelines(["\textern unsigned int parity[2][", str(q[0]), "];\n"])
-
-	
 	fh.writelines(["\textern unsigned bit_size A[2][", str(q[1]), "];\n"])
 	fh.writelines(["\textern unsigned bit_size B[2][", str(q[2]), "];\n"])
 	fh.writelines(["\textern bit_size T_inv[3][", str(q[3]), "];\n"])
-	fh.writelines(["\textern int p1_encoder[3][", str(q[4]), "];\n"])
+	fh.writelines(["\textern bit_size p1_encoder[3][", str(q[4]), "];\n"])
+	
+	fh.writelines(["\textern unsigned bit_size A_index[", str(m-g+1), "];\n"])
+	fh.writelines(["\textern unsigned bit_size T_inv_index[",str(m-g+1) , "];\n"])
+	fh.writelines(["\textern unsigned bit_size p1_encoder_index[",str(g+1) , "];\n"])
+	
+	
 	fh.writelines(["\n#endif"])
 	
 	fh.close()
