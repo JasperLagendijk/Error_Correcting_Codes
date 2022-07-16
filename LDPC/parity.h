@@ -15,6 +15,7 @@
 
 #define bit_size short int 
 	extern unsigned int parity[2][2376];
+	unsigned bit_size index[2376];
 	extern unsigned bit_size A[2][1566];
 	extern unsigned bit_size B[2][54];
 	extern bit_size T_inv[3][1782];

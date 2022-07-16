@@ -99,7 +99,7 @@ LDPC_decoder construct_decoder()
 	return dec;
 }
 
-void decode_ldpc(int message[ROWS], int codeword[COLS], LDPC_decoder * dec)
+void decode_ldpc_oo(int message[ROWS], int codeword[COLS], LDPC_decoder * dec)
 {
 	//Step 1: initialize , i.e. set all values in varNodes to zero and copy LLR from message to  var
 	//printf("Initializing decoder\n");
