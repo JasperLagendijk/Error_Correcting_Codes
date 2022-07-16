@@ -1,5 +1,5 @@
-#ifndef LDPC
-#define LDPC
+#ifndef LDPC_DECODER_OO
+#define LDPC_DECODER_OO
 
 
 typedef struct LDPC_decoder LDPC_decoder;
@@ -31,7 +31,6 @@ typedef struct checkNode {
 
 LDPC_decoder construct_decoder();
 
-void encode_ldpc(int msg[ROWS], int codeword[COLS]);
 
 void decode_ldpc(int message[ROWS], int codeword[COLS], LDPC_decoder * dec);
 

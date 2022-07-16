@@ -93,7 +93,7 @@ def main():
 	fc.writelines(L2)
 	fc.writelines(["}\n};\n"])
 	
-	L4 = []
+	'''L4 = []
 	for i  in range(int(L2[-1])):
 		L4.append(str(int(L2.index(str(i))/2)))
 		L4.append(", ")
@@ -102,7 +102,7 @@ def main():
 	fc.writelines(["\nunsigned bit_size A_index[", str(m-g+1) , "] =\t{ "])
 	fc.writelines(L4)
 	fc.writelines(["};\n\n"])
-		# B matrix
+		'''# B matrix
 	
 	L1 = []
 	L2 = []
@@ -149,14 +149,14 @@ def main():
 	fc.writelines(L3)
 	fc.writelines(["}\n};\n"])
 	
-	for i  in range(int(L2[-1])):
+	'''for i  in range(int(L2[-1])):
 		L4.append(str(int(L2.index(str(i))/2)))
 		L4.append(", ")
 	L4.append(str(q[3]))
 	
 	fc.writelines(["\nunsigned bit_size T_inv_index[", str(m-g+1) , "] =\t{ "])
 	fc.writelines(L4)
-	fc.writelines(["};\n\n"])
+	fc.writelines(["};\n\n"])'''
 	
 	
 	
@@ -185,14 +185,14 @@ def main():
 	fc.writelines(L3)
 	fc.writelines(["}\n};\n"])
 	
-	for i  in range(int(L2[-1])):
+	'''for i  in range(int(L2[-1])):
 		L4.append(str(int(L2.index(str(i))/2)))
 		L4.append(", ")
 	L4.append(str(q[4]))
 	
 	fc.writelines(["\nunsigned bit_size p1_encoder_index[", str(g+1) , "] =\t{ "])
 	fc.writelines(L4)
-	fc.writelines(["};\n\n"])
+	fc.writelines(["};\n\n"])'''
 	
 	
 		
@@ -222,9 +222,9 @@ def main():
 	fh.writelines(["\textern bit_size T_inv[3][", str(q[3]), "];\n"])
 	fh.writelines(["\textern bit_size p1_encoder[3][", str(q[4]), "];\n"])
 	
-	fh.writelines(["\textern unsigned bit_size A_index[", str(m-g+1), "];\n"])
-	fh.writelines(["\textern unsigned bit_size T_inv_index[",str(m-g+1) , "];\n"])
-	fh.writelines(["\textern unsigned bit_size p1_encoder_index[",str(g+1) , "];\n"])
+	#fh.writelines(["\textern unsigned bit_size A_index[", str(m-g+1), "];\n"])
+	#fh.writelines(["\textern unsigned bit_size T_inv_index[",str(m-g+1) , "];\n"])
+	#fh.writelines(["\textern unsigned bit_size p1_encoder_index[",str(g+1) , "];\n"])
 	
 	
 	fh.writelines(["\n#endif"])

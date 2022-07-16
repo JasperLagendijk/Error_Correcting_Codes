@@ -1,15 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parity.h"
-#include "ldpc.h"
+#include "ldpc_decoder_oo.h"
 
 #define BP_MAX 20
-
-
-
-int sign(int x) {
-    return (x > 0) - (x < 0);
-}
 
 int sign_b(int x)
 { 
@@ -43,14 +37,7 @@ void min_sum(struct checkNode * check) //Performs min-sum algorithm on values an
 				j = i;
 			}
 	}
-	//for (int i = 0; i < check->connectedNodes; i++) if ( i != j && abs(check->messages[i]) < min2) min2 = abs(check->messages[i]);
-	//Step 2: for each connected variable node
 	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = min*sig*sign(check->messages[i])/2;
-	/*{
-		if (i == j) check->varNode[i]->messages[check->index[i]] = min2*-1*sig;
-		else check->varNode[i]->messages[check->index[i]] = min*-1*sig;
-		
-	}*/
 	
 }
 
@@ -58,7 +45,6 @@ void message_out_variable(struct variableNode * var) //Calculates variable node 
 {
 	int msg = var->incoming_bit;
 	for (int i = 0; i < var->connectedNodes; i++) msg += var->messages[i];
-	//for (int i = 0; i < var->connectedNodes; i++) var->chNode[i]->messages[var->index[i]] = msg - var->messages[i];
 	for (int i = 0; i < var->connectedNodes; i++) var->messages[i] = msg - var->messages[i];
 }
 
@@ -78,34 +64,6 @@ int  message_decoded(struct variableNode * var)
 	for (int i = 0; i < var->connectedNodes; i++) msg += var->messages[i];
 	return msg;
 }
-
-void encode_ldpc(int msg[ROWS], int codeword[COLS])
-{
-	// Find p1
-	// p1 = p1_encode * msg
-	int p1[GAP] = {0};
-	int p2[ROWS-GAP] = {0};
-	
-	for (int j = 0; j < LEN_P1_ENC; j++) p1[p1_encoder[1][j]] += p1_encoder[2][j]*msg[p1_encoder[0][j]];
-	for (int i = 0; i < GAP; i++) p1[i] = p1[i] % 2;
-	
-	// Find p2
-	int As[ROWS-GAP] = {0};
-	int Bp[ROWS-GAP] = {0};
-	
-	for (int j = 0; j < LEN_A; j++) As[A[1][j]] += msg[A[0][j]];
-	for (int j = 0; j < LEN_B; j++) Bp[B[1][j]] += p1[B[0][j]];
-	for (int j = 0; j < LEN_T_INV; j++) p2[T_inv[1][j]] += T_inv[2][j]*(As[T_inv[0][j]]+Bp[T_inv[0][j]]);
-	
-	for (int i = 0; i < ROWS-GAP; i++) p2[i] = abs(p2[i]) % 2;
-	 //Codeword consists of 3 parts :[msg, p1, p2]
-	for (int i = 0; i < ROWS; i++) codeword[i] = msg[i];
-	for (int i = ROWS; i < ROWS+GAP; i++) codeword[i] = p1[i-ROWS];
-	for (int i = ROWS+GAP; i < COLS; i++) codeword[i] = p2[i-ROWS-GAP];
-}
-
-
-
 
 LDPC_decoder construct_decoder()
 {
@@ -171,51 +129,3 @@ void decode_ldpc(int message[ROWS], int codeword[COLS], LDPC_decoder * dec)
 	for (int i = 0; i < ROWS; i++) message[i] = message_decoded(dec->var[i]);
 	
 }
-
-
-
-
-/*int main() 
-{
-	/*
-	int msg[ROWS] = {};
-	int message[COLS] = {};
-	int codeword[COLS];
-	double BER = 0;
-	LDPC_decoder dec = construct_decoder();
-	//for (int i = 0; i < ROWS; i++) printf("%d ", msg[i]);
-	//printf("\n");
-	srand (2);
-	
-		
-	
-	
-	
-	for (int j = 0; j < 100000; j++)
-	{
-		// Generate message
-		for (int i = 0; i < ROWS; i++) msg[i] = rand() % 2;
-		
-		//Encode, transmit and decode message
-		encode_ldpc(msg, codeword);
-		
-		for (int i = 0; i < COLS; i++) codeword[i] =4* ( (codeword[i] * 2 )-1) + (rand() % 11)-5;
-		decode_ldpc(message, codeword, &dec);
-		
-		//Compare Bit error rates
-		for (int i = 0; i < ROWS; i++) 
-		{
-			if (message[i] > 0) message[i] = 1;
-			else message[i] = 0;
-			if (message[i] != msg[i]) BER++;
-		}
-	
-	}
-	printf("BER: %f", BER/(324*1000));
-	printf("\nMessage: \n");
-	/*for (int i = 0; i < ROWS; i++) printf("%d ", codeword[i]);
-	printf("\nParity: \n");
-	for (int i = ROWS; i < COLS; i++) printf("%d ", codeword[i]);
-	
-	return 0;
-}*/
