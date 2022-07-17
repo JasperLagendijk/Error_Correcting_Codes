@@ -11,34 +11,32 @@ int sign_b(int x)
 	else return 0;
 }
 
+int sign(int x)
+{
+		return (x > 0) - (x < 0);
+}
+
 void min_sum(struct checkNode * check) //Performs min-sum algorithm on values and messages and places them in messages, original incoming messages are lost
 {
-	int sig = 1;
+	int sig = 0;
 	int min = 0;
 	int min2 = 0;
 	int j = 0;
 	int l = 0;
+	
 	//Step 1: calculate mother sign
 	min = abs(check->messages[0]);
-	min2 = abs(check->messages[0]);
+	//min2 = abs(check->messages[0]);
 	for (int i = 0; i < check->connectedNodes; i++)
 	{
-			int x = check->messages[i];
-			//Find absolute value of check->messages
-			int mask = x >> 31;
-			x = x ^ mask;
-			x = x - mask;
-
-			//x = nu abs x
-			sig *= (mask & 1);
-			if (x < min) 
+			sig += fast_sign(check->messages[i]);
+			if (fast_abs(check->messages[i]) < min) 
 			{
-				min = x;
+				min = fast_abs(check->messages[i]);
 				j = i;
 			}
 	}
-	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = min*sig*sign(check->messages[i])/2;
-	
+	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = min * (1 - (2 * ( (sig+fast_sign(check->messages[i])) % 2)));
 }
 
 void message_out_variable(struct variableNode * var) //Calculates variable node value and places them in messages
@@ -73,7 +71,8 @@ LDPC_decoder construct_decoder()
 	
 	//Allocate memory
 	for (int i = 0; i < COLS; i++) var[i] = malloc(sizeof(*var[0]));
-	for (int i = 0; i < ROWS; i++) check[i] = malloc(sizeof(*check[0]));
+	for (int i = 0; i < COLS-ROWS; i++) check[i] = malloc(sizeof(*check[0]));
+	
 	
 	//Fill check nodes:
 	int j, k;
@@ -83,7 +82,7 @@ LDPC_decoder construct_decoder()
 		j = parity[1][i];
 		k = parity[0][i];
 		
-		//connect varNode to Checknode and vice versa and remember index refelctively
+		//connect varNode to Checknode and vice versa and remember index
 		check[j]->varNode[check[j]->connectedNodes] = var[k]; 
 		check[j]->index[check[j]->connectedNodes] = var[k]->connectedNodes;
 		
@@ -101,15 +100,12 @@ LDPC_decoder construct_decoder()
 
 void decode_ldpc_oo(int message[ROWS], int codeword[COLS], LDPC_decoder * dec)
 {
-	//Step 1: initialize , i.e. set all values in varNodes to zero and copy LLR from message to  var
-	//printf("Initializing decoder\n");
+	//Step 1: initialize , i.e. set all values in varNodes to zero and copy LLR from message to var
 	for (int i  = 0 ; i < COLS;  i++) 
 	{	
-		//printf("(%d)\n", i);
-		dec->var[i]->incoming_bit = codeword[i]; //set incoming bit
+		dec->var[i]->incoming_bit = codeword[i]; //set message over incoming half-edge c
 		for (int j = 0; j < dec->var[i]->connectedNodes; j++) dec->var[i]->messages[j] = 0; //set messages from checknode to varnode
 	}
-	//printf("Starting Belief Propagation\n");
 	//Step 2: belief propagation
 	for (int bp = 0; bp < BP_MAX; bp++)
 	{
@@ -120,10 +116,10 @@ void decode_ldpc_oo(int message[ROWS], int codeword[COLS], LDPC_decoder * dec)
 		for (int i = 0; i < COLS; i++) message_var_to_check(dec->var[i]);
 		
 		//Calculate downward messages
-		for (int i = 0; i < ROWS; i++) min_sum(dec->check[i]);
+		for (int i = 0; i < COLS-ROWS; i++) min_sum(dec->check[i]);
 		
 		//Copy messages from checkNode to varNode
-		for (int i = 0; i < ROWS; i++) message_check_to_var(dec->check[i]);
+		for (int i = 0; i < COLS-ROWS; i++) message_check_to_var(dec->check[i]);
 	}
 	//Step 3: calculate outgoing message
 	for (int i = 0; i < ROWS; i++) message[i] = message_decoded(dec->var[i]);
