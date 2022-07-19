@@ -15,16 +15,16 @@ struct LDPC_decoder {
 
 struct variableNode {
 	int connectedNodes;
-	int incoming_bit;
+	double incoming_bit;
 	int index[MAX_CHECK_NODE];
-	int messages[MAX_CHECK_NODE]; //Represents both the incoming or outgoing messages, doing it this way allows for easy multithreading/cuda support
+	double messages[MAX_CHECK_NODE]; //Represents both the incoming or outgoing messages, doing it this way allows for easy multithreading/cuda support
 	checkNode * chNode[MAX_CHECK_NODE];	
 };
 
 typedef struct checkNode {
 	int connectedNodes;
 	int index[MAX_VAR_NODE];
-	int messages[MAX_VAR_NODE]; //Represents both the incoming and outgoing messages.
+	double messages[MAX_VAR_NODE]; //Represents both the incoming and outgoing messages.
 	variableNode * varNode[MAX_VAR_NODE];
 } checkNode;
 
@@ -32,6 +32,6 @@ typedef struct checkNode {
 LDPC_decoder construct_decoder();
 
 
-void decode_ldpc_oo(int message[ROWS], int codeword[COLS], LDPC_decoder * dec);
+void decode_ldpc_oo(int message[ROWS], int codeword[COLS], LDPC_decoder * dec, char setting);
 
 #endif

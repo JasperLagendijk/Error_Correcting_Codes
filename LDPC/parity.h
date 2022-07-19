@@ -25,6 +25,8 @@
 
 	int fast_abs(int x);
 
-int fast_sign(int x);
+	int fast_sign(int x);
+	
+	int sign(int x);
 
 #endif

@@ -43,3 +43,8 @@ int fast_sign(int x)
 	return (x & 1);
 }
 
+
+int sign(int x)
+{
+		return (x > 0) - (x < 0);
+}

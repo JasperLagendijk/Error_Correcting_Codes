@@ -9,7 +9,7 @@
 #include "ldpc_decoder_oo.h"
 //#endif
 
-#define NSIMS 10000
+#define NSIMS 1000
 
 
 /*int fast_abs(int x)
@@ -54,10 +54,10 @@ int main(int argc, char * argv[])
 		//Encode, transmit and decode message
 		encode_ldpc(msg, codeword);
 		codeword[0] = 1-codeword[0];
-		for (int i = 0; i < COLS; i++) codeword[i] = -10*( (codeword[i] * 2 )-1); //- (rand() % 10)-5;
+		for (int i = 0; i < COLS; i++) codeword[i] = -200*( (codeword[i] * 2 )-1); //- (rand() % 10)-5;
 		for (int i = 0; i < COLS; i++) codeword_enc[i] = codeword[i];
-		//decode_ldpc_oo(message, codeword, &dec);
-		decode_ldpc_fast(message, codeword);
+		decode_ldpc_oo(message, codeword, &dec, 'a');
+		//decode_ldpc_fast(message, codeword);
 		
 		//Compare Bit error rates
 		for (int i = 0; i < ROWS; i++) 

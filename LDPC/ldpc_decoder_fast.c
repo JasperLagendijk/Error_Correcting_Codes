@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "parity.h"
 
 #define UP 1
@@ -27,12 +28,12 @@ void message_up(int mu[2][LEN_PARITY], int codeword[COLS]) //Calculates messages
 void message_down_min_sum(int mu[2][LEN_PARITY])  //Calculates messages from  check nodes to variable nodes using Min-Sum parity checking
 {
 	//Step 1. Precompute messages
-	int pre_computed_sign[COLS-ROWS] = {0};
+	int pre_computed_sign[COLS-ROWS] = {[0 ... COLS-ROWS-1] = -1};
 	int pre_computed_min[COLS-ROWS] = {[0 ... COLS-ROWS-1] = 100000};
 	for (int i = 0; i < LEN_PARITY; i++)
 	{
-			int x = fast_abs(mu[UP][i]);
-			pre_computed_sign[parity[CHECK][i]] += fast_sign(mu[UP][i]);
+			int x = abs(mu[UP][i]);
+			pre_computed_sign[parity[CHECK][i]] *= sign(mu[UP][i]);
 			if (x < pre_computed_min[parity[CHECK][i]]) 
 			{
 				pre_computed_min[parity[CHECK][i]] = x;	
@@ -43,8 +44,8 @@ void message_down_min_sum(int mu[2][LEN_PARITY])  //Calculates messages from  ch
 	//Step2. Calculate outgoing messages
 	for (int i = 0; i < LEN_PARITY; i++)
 	{
-		int x = fast_sign(mu[UP][i]);
-		int sign = 1 - (2 * ((x + pre_computed_sign[parity[CHECK][i]]) % 2));
+		int x = sign(mu[UP][i]);
+		int sign = x * pre_computed_sign[parity[CHECK][i]];
 		mu[DOWN][i] = sign*pre_computed_min[parity[CHECK][i]];
 	}
 	

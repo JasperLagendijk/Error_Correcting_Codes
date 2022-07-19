@@ -14,10 +14,12 @@ if(USE_LDPC)
 	list(APPEND EXTRA_LIBS LDPC)
 	list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/LDPC")
 endif()	
-	
+
+list (APPEND EXTRA_LIBS m)	
 add_executable(Simulation sim.c)
 
 target_link_libraries(Simulation PUBLIC ${EXTRA_LIBS})
+
 
 target_include_directories(Simulation PUBLIC
 							"${PROJECT_BINARY_DIR}"
