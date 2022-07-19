@@ -194,8 +194,15 @@ def main():
 	fc.writelines(L4)
 	fc.writelines(["};\n\n"])'''
 	
-	
+	fc.writelines(["int fast_abs(int x)\n", "{\n"])
+	fc.writelines(["\tint mask = x >> 31; //Set parity bit as first bit, set all other bits as 0\n"])
+	fc.writelines(["\tx = x ^ mask; // Flip all bits, to change to 2's complement\n"])
+	fc.writelines(["\tx = x - mask; // Fix first bit\n"])
+	fc.writelines(["\treturn x;\n }\n\n"])
 		
+	fc.writelines(["int sign(int x)\n", "{\n"])
+	fc.writelines(["\treturn (x > 0) - (x < 0);\n", "}\n\n"])	
+
 	fc.close()
 	
 	fh = open("parity.h", "w")
@@ -206,7 +213,7 @@ def main():
 	fh.writelines(["#define GAP ", str(g), "\n"])
 	fh.writelines(["#define MAX_VAR_NODE ", str(np.max(np.sum(parity, 1))), "\n"])
 	fh.writelines(["#define MAX_CHECK_NODE ", str(np.max(np.sum(parity, 0))), "\n\n"])
-	
+
 	
 	fh.writelines(["#define LEN_PARITY ", str(q[0]), "\n"])
 	fh.writelines(["#define LEN_A ", str(q[1]), "\n"])
@@ -214,18 +221,19 @@ def main():
 	fh.writelines(["#define LEN_T_INV ", str(q[3]), "\n"])
 	fh.writelines(["#define LEN_P1_ENC ", str(q[4]), "\n\n"])
 	fh.writelines(["#define bit_size short int \n"])
-	
+	fh.writelines(["#define BP_MAX 20\n\n"])
 	
 	fh.writelines(["\textern unsigned int parity[2][", str(q[0]), "];\n"])
 	fh.writelines(["\textern unsigned bit_size A[2][", str(q[1]), "];\n"])
 	fh.writelines(["\textern unsigned bit_size B[2][", str(q[2]), "];\n"])
 	fh.writelines(["\textern bit_size T_inv[3][", str(q[3]), "];\n"])
-	fh.writelines(["\textern bit_size p1_encoder[3][", str(q[4]), "];\n"])
+	fh.writelines(["\textern bit_size p1_encoder[3][", str(q[4]), "];\n\n"])
 	
 	#fh.writelines(["\textern unsigned bit_size A_index[", str(m-g+1), "];\n"])
 	#fh.writelines(["\textern unsigned bit_size T_inv_index[",str(m-g+1) , "];\n"])
 	#fh.writelines(["\textern unsigned bit_size p1_encoder_index[",str(g+1) , "];\n"])
-	
+	fh.writelines(["\tint fast_abs(int x);\n"])
+	fh.writelines(["\tint sign(int x);"])
 	
 	fh.writelines(["\n#endif"])
 	

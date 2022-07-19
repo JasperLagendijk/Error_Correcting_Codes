@@ -38,7 +38,7 @@ void min_sum(checkNode * check) //Performs min-sum algorithm on values and messa
 
 void attenuated_min_sum(checkNode * check, double c) 
 {
-	int sig = 0;
+	int sig = 1;
 	double min = 0;
 	//int min2 = 0;
 	int j = 0;
@@ -48,20 +48,20 @@ void attenuated_min_sum(checkNode * check, double c)
 	//min2 = abs(check->messages[0]);
 	for (int i = 0; i < check->connectedNodes; i++)
 	{
-			sig += sign(check->messages[i]);
+			sig *= sign(check->messages[i]);
 			if (abs(check->messages[i]) < min) 
 			{
 				min = abs(check->messages[i]);
 				j = i;
 			}
 	}
-	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = min * (sig*sign(check->messages[i]))*c;
+	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = c*min * (sig*sign(check->messages[i]));
 	
 }
 
 void offset_min_sum(checkNode * check, double c) 
 {
-	int sig = 0;
+	int sig = 1;
 	double min = 0;
 	//int min2 = 0;
 	int j = 0;
@@ -71,7 +71,7 @@ void offset_min_sum(checkNode * check, double c)
 	//min2 = abs(check->messages[0]);
 	for (int i = 0; i < check->connectedNodes; i++)
 	{
-			sig += sign(check->messages[i]);
+			sig = sign(check->messages[i]);
 			if (abs(check->messages[i]) < min) 
 			{
 				min = abs(check->messages[i]);
