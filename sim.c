@@ -12,21 +12,6 @@
 #define NSIMS 1000
 
 
-/*int fast_abs(int x)
-{
-	int mask = x >> 31; //Set parity bit as first bit, set all other bits as 0
-	x = x ^ mask; // Flip all bits, to change to 2's complement
-	x = x - mask; // Fix first bit
-}
-
-int fast_sign(int x)
-{
-	x = x >> 31; //Set parity bit as first bit, set all other bits as 0
-	return (x & 1);
-}*/
-
-
-
 int main(int argc, char * argv[]) 
 {
 	
@@ -56,7 +41,7 @@ int main(int argc, char * argv[])
 		codeword[0] = 1-codeword[0];
 		for (int i = 0; i < COLS; i++) codeword[i] = -2*( (codeword[i] * 2 )-1); //- (rand() % 10)-5;
 		for (int i = 0; i < COLS; i++) codeword_enc[i] = codeword[i];
-		decode_ldpc_oo(message, codeword, &dec, 'a');
+		decode_ldpc_oo(message, codeword, &dec, 'g');
 		//decode_ldpc_fast(message, codeword);
 		
 		//Compare Bit error rates

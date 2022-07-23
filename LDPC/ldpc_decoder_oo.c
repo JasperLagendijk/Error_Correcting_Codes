@@ -6,13 +6,6 @@
 
 #define BP_MAX 20
 
-/*int sign_b(int x)
-{ 
-	if (x > 0) return 1;
-	else return 0;
-}*/
-
-
 
 void min_sum(checkNode * check) //Performs min-sum algorithm on values and messages and places them in messages, original incoming messages are lost
 {
@@ -86,7 +79,11 @@ void gallager(checkNode * check)
 {
 	//Step 1. Precompute prod(tanh(1/2 messages) as prod_tanh
 	double prod_tan = 1;
-	for (int i = 0; i < check->connectedNodes; i++) prod_tan *= tanh(check->messages[i]);
+	for (int i = 0; i < check->connectedNodes; i++) 
+	{
+		check->messages[i] = tanh(check->messages[i]);
+		prod_tan *= check->messages[i];
+	}
 	//Step2. Compute 2*tanh-1(prod_tanh/prod_tanh([x]))
 	for (int i = 0; i < check->connectedNodes; i++) check->messages[i] = 2*atanh((0.5*(prod_tan/tanh(check->messages[i]))));//2*atanh(prod_tan/tanh(check->messages[i]));
 }
