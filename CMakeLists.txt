@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(GCC_COVERAGE_COMPILE_FLAGS "-O3 -march=native -mtune=native")
+SET(GCC_COVERAGE_COMPILE_FLAGS "-fPIC -O3 -march=native -mtune=native")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
 
@@ -16,7 +16,8 @@ if(USE_LDPC)
 endif()	
 
 list (APPEND EXTRA_LIBS m)	
-add_executable(Simulation sim.c)
+#add_executable(Simulation sim.c)
+add_library(Simulation SHARED sim.c)
 
 target_link_libraries(Simulation PUBLIC ${EXTRA_LIBS})
 

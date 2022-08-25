@@ -32,6 +32,6 @@ typedef struct checkNode {
 LDPC_decoder construct_decoder();
 
 
-void decode_ldpc_oo(int message[ROWS], int codeword[COLS], LDPC_decoder * dec, char setting);
+void decode_ldpc_oo(double message[ROWS], double codeword[COLS], LDPC_decoder * dec, char setting, double constant);
 
 #endif

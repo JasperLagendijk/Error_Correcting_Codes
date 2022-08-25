@@ -1,5 +1,5 @@
 from scipy.io import loadmat
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, csc_matrix
 import numpy as np
 def main():
 	
@@ -43,7 +43,7 @@ def main():
 	T_inv_sprs = csr_matrix(T_inv)
 	parity_sprs = csr_matrix(parity)
 	
-		
+	print(csc_matrix(parity_sprs))
 	
 	# Create parity.c file
 	fc = open("parity.c", "w")

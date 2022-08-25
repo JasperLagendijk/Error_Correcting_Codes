@@ -12,7 +12,26 @@
 #define NSIMS 1000
 
 
-int main(int argc, char * argv[]) 
+double * decode_ldpc(double LLRs[648], char s, double c)
+{	
+	//printf("test");
+	double * messages = (double *) calloc(324, sizeof(double));
+	LDPC_decoder dec = construct_decoder();
+	decode_ldpc_oo(messages, LLRs, &dec, 's', c);
+	return messages;
+}
+
+
+int * encode(int message[ROWS])
+{
+	int * codeword = (int *) calloc(648, sizeof(int));
+	//printf("[");
+	//for (int i = 0; i < 324; i++) printf("%d ", message[i]);
+	//printf("]\n");	
+	encode_ldpc(message, codeword);
+	return codeword;
+}
+/*int main(int argc, char * argv[]) 
 {
 	
 	int msg[ROWS] = {};
@@ -60,4 +79,4 @@ int main(int argc, char * argv[])
 	printf("BER: %f\n",  BER/(324*NSIMS));
 	printf("BER EXP: %f\n", BER_EXP/(324*NSIMS));
 	
-}
+}*/
