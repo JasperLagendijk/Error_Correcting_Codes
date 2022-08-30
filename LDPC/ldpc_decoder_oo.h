@@ -9,29 +9,33 @@ typedef struct variableNode variableNode;
 typedef struct checkNode  checkNode;
 
 struct LDPC_decoder {
-	variableNode  * var[COLS];
-	checkNode * check[ROWS];
+	int cLen;
+	int vLen;
+	variableNode  ** var;
+	checkNode ** check;
 };
 
 struct variableNode {
 	int connectedNodes;
 	double incoming_bit;
-	int index[MAX_CHECK_NODE];
-	double messages[MAX_CHECK_NODE]; //Represents both the incoming or outgoing messages, doing it this way allows for easy multithreading/cuda support
-	checkNode * chNode[MAX_CHECK_NODE];	
+	int name;
+	int * index;
+	double * messages; //Represents both the incoming or outgoing messages, doing it this way allows for easy multithreading/cuda support
+	checkNode ** chNode;	
 };
 
 typedef struct checkNode {
 	int connectedNodes;
-	int index[MAX_VAR_NODE];
-	double messages[MAX_VAR_NODE]; //Represents both the incoming and outgoing messages.
-	variableNode * varNode[MAX_VAR_NODE];
+	int * index;
+	int name;
+	double * messages; //Represents both the incoming and outgoing messages.
+	variableNode ** varNode;
 } checkNode;
 
 
 LDPC_decoder construct_decoder();
 
 
-void decode_ldpc_oo(double message[ROWS], double codeword[COLS], LDPC_decoder * dec, char setting, double constant);
+//void decode_ldpc_oo(double message[ROWS], double codeword[COLS], LDPC_decoder * dec, char setting, double constant);
 
 #endif
