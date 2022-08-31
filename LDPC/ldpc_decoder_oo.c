@@ -17,9 +17,24 @@ unsigned int parity[2][2376] = {
 
 void print_decoder(LDPC_decoder dec)
 {
-	for (int i = 0; i < dec.cLen; i++) printf("%d ", dec.check[i]->name);
+	for (int i = 0; i < dec.cLen; i++) 
+	{
+		printf("\nCheckNode: %d", dec.check[i]->name);
+		for (int j = 0; j < dec.check[i]->connectedNodes; j++)
+		{
+			printf("\n\t %d", dec.check[i]->varNode[j]->name);
+		}
+	}
 	printf("\n");
-	for (int i = 0; i < dec.vLen; i++) printf("%d ", dec.var[i]->name);
+	for (int i = 0; i < dec.vLen; i++) 
+	{
+		printf("\n VarNode: %d", dec.var[i]->name);
+		for (int j = 0; j < dec.var[i]->connectedNodes; j++)
+		{
+			printf("\n\t %d", dec.var[i]->chNode[j]->name);
+		}
+	}
+	printf("\n");
 }
 
 
@@ -124,11 +139,33 @@ LDPC_decoder construct_decoder(int length, unsigned int sparse[2][length])
 	return dec;
 }
 
+void destruct_decoder(LDPC_decoder dec)
+{
+	//Step 1. Release variables inside structs
+	for (int i = 0; i < dec.cLen; i++)
+	{
+		free(dec.check[i]->index);
+		free(dec.check[i]->messages);
+		free(dec.check[i]->varNode);
+	}
+	for (int i = 0; i < dec.vLen; i++)
+	{
+		free(dec.var[i]->index);
+		free(dec.var[i]->messages);
+		free(dec.var[i]->chNode);
+	}
+	//Step 2. Release structs
+	free(dec.var);
+	free(dec.check);
+	//Step 3. Release reference to structs	
+	return;
+}
 
 int main() 
 {
 	LDPC_decoder dec = construct_decoder(2376, parity);
 	print_decoder(dec);
+	destruct_decoder(dec);
 	return 0;
 }
 
